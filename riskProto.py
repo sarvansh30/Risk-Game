@@ -2,6 +2,7 @@ from Continents import Continent
 from Territory import Territory
 from Player import Player
 from Game import Game
+from GameState import AIPlayer
 import os
 # Create continents
 north_america = Continent("North America", 3)
@@ -45,22 +46,11 @@ brazil.add_adjacent_territory(venezuela)
 
 # Creating players
 player1 = Player("PLAYER")
-player2 = Player("AI")
+player2 = AIPlayer("AI")
 
 game = Game(player1,player2)
 game.add_continent(north_america)
 game.add_continent(south_america)
-
-
-# Print the names of the continents
-# for continent in game.continents:
-#     print(continent.name)
-#     for territory in continent.territories:
-#         print(f"Territory: {territory.name}")
-#         print("Adjacent territories:")
-#         for adjacent_territory in territory.adjacent_territories:
-#             print(f"- {adjacent_territory.name}")
-#             print()
 
 game.start()
 
@@ -109,15 +99,33 @@ os.system('cls' if os.name == 'nt' else 'clear')
 print("Risk Game Start\n")
 
 while True:
-    print(f"{game.current_player.name}'s turn")
-    print("Your choice?\n1 End Turn\n2Attack\n3Place Troops")
-    sign=int(input())
+    if isinstance(game.current_player, AIPlayer):  # Check if the current player is an AI player
+        possible_moves = game.get_possible_moves(game.current_player)
+        print("Possible moves for AI player:")
+        for move in possible_moves:
+            print(f"{move['action']}, {move['from_territory']}, {move['to_territory']}, {move['num_armies']}")
+        # Have the AI player (player2) choose a move
+        move = player2.choose_and_apply_move(game,player2)
 
-    if sign==1:
+        # The chosen move has already been applied in the choose_and_apply_move function,
+        # so there's no need to call game.make_move here
+
+        # If you need to update the number of armies based on the move,
+        # you can do it here. However, this would typically be done inside the make_move or apply_move function.
+        # player2.update_num_armies(move['num_armies'])
+
+        # Switch to the other player
         game.switch_player()
-    elif sign==2:
-        game.attack()
+
     else:
-        game.place_or_move_armies()
+        print("Your choice?\n1 End Turn\n2Attack\n3Place Troops")
+        sign = int(input())
+        if sign == 1:
+            game.switch_player()
+        elif sign == 2:
+            game.attack()
+        else:
+            game.place_or_move_armies()
+
 
 
