@@ -113,7 +113,8 @@ while True:
         # If you need to update the number of armies based on the move,
         # you can do it here. However, this would typically be done inside the make_move or apply_move function.
         # player2.update_num_armies(move['num_armies'])
-
+        print("Move performed by AI player:")
+        print(f"{move['action']}, {move['from_territory']}, {move['to_territory']}, {move['num_armies']}")
         # Switch to the other player
         game.switch_player()
 

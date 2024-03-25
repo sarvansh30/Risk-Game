@@ -6,30 +6,27 @@ class AIPlayer(Player):
         super().__init__(name)
 
     def minimax(self, game, depth, is_maximizing, player2):
-        # Base case: the game is over or the maximum depth has been reached
         if depth == 0 or game.is_over():
             return self.evaluate(game)
 
         if is_maximizing:
-            max_eval = float('-inf')
+            best_score = float('-inf')
             for move in game.get_possible_moves(self):
-                # Apply the move
                 game.apply_move(move)
-                eval = self.minimax(game, depth - 1, False, player2)
-                # Undo the move
+                score = self.minimax(game, depth - 1, False, player2)
                 game.undo_move(move)
-                max_eval = max(max_eval, eval)
-            return max_eval
+                if move['action'] == 'attack':
+                    score += 10  # Add a bonus for 'attack' moves
+                best_score = max(score, best_score)
+            return best_score
         else:
-            min_eval = float('inf')
+            best_score = float('inf')
             for move in game.get_possible_moves(player2):
-                # Apply the move
                 game.apply_move(move)
-                eval = self.minimax(game, depth - 1, True, player2)
-                # Undo the move
+                score = self.minimax(game, depth - 1, True, player2)
                 game.undo_move(move)
-                min_eval = min(min_eval, eval)
-            return min_eval
+                best_score = min(score, best_score)
+            return best_score
 
     def evaluate(self, game):
         score = 0
