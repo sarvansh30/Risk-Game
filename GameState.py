@@ -17,7 +17,12 @@ class AIPlayer(Player):
                 score = self.minimax(game, depth - 1, False, player2)
                 game.undo_move(move)
                 if move['action'] == 'attack':
-                    score += 10  # Add a bonus for 'attack' moves
+                    score += 30  # Add a large bonus for 'attack' moves
+                elif move['action'] == 'move' and any(adjacent_territory.owner != self for adjacent_territory in
+                                                      move['from_territory'].adjacent_territories):
+                    score += 20  # Add a smaller bonus for 'move' actions that position the player to attack
+                elif move['action'] == 'place' :
+                    score += 10  # Add a small bonus for 'place' actions that reinforce the player's territories
                 best_score = max(score, best_score)
             return best_score
         else:

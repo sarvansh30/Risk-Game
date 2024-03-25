@@ -130,30 +130,6 @@ class Game:
         for i, territory in enumerate(self.current_player.territories):
             print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
 
-    def attack2(self, from_territory, to_territory, num_armies):
-        # Check if the move is valid
-        if from_territory.owner != to_territory.owner and from_territory in to_territory.adjacent_territories:
-            # Roll dice for the attack
-            attack_dice = sorted([random.randint(1, 6) for _ in range(num_armies)], reverse=True)
-            defense_dice = sorted([random.randint(1, 6) for _ in range(min(to_territory.armies, 2))], reverse=True)
-
-            # Compare dice and remove armies
-            for attack_die, defense_die in zip(attack_dice, defense_dice):
-                if attack_die > defense_die:
-                    to_territory.armies -= 2
-                    if to_territory.armies < 0:
-                        to_territory.armies = 0
-                    if to_territory.armies == 0:
-                        # Remove the territory from the territories list of the previous owner
-                        to_territory.owner.territories.remove(to_territory)
-                        # Change the owner of the territory and add it to the territories list of the new owner
-                        to_territory.owner = self.current_player
-                        self.current_player.territories.append(to_territory)
-                        to_territory.armies = num_armies
-                else:
-                    self.current_player.armies += num_armies
-            # Decrease the number of armies in from_territory by num_armies
-            from_territory.armies -= num_armies
 
     def place_or_move_armies(self):
         # Print the number of troops left for the current player
@@ -211,22 +187,6 @@ class Game:
             # Update the number of armies for the territories
             from_territory.armies -= num_armies
             to_territory.armies += num_armies
-
-    def place_or_move_armies2(self, action, territory_from=None, territory_to=None, num_armies=None):
-        if action == 'place':
-            # Update the number of armies for the player and the territory
-            self.current_player.armies -= num_armies
-            territory_to.armies += num_armies
-        elif action == 'move':
-            # Get adjacent territories owned by the current player
-            owned_adjacent_territories = [territory for territory in territory_from.adjacent_territories if
-                                          territory.owner == self.current_player]
-            # If there are no owned adjacent territories, return
-            if not owned_adjacent_territories:
-                return
-            # Update the number of armies for the territories
-            territory_from.armies -= num_armies
-            territory_to.armies += num_armies
 
     def get_possible_moves(self, player):
         possible_moves = []

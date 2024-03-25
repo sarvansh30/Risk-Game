@@ -4,6 +4,7 @@ from Player import Player
 from Game import Game
 from GameState import AIPlayer
 import os
+import random
 # Create continents
 north_america = Continent("North America", 3)
 south_america = Continent("South America", 2)
@@ -61,7 +62,8 @@ while True:
     print(f"{game.current_player.name}'s turn")
 
     # Get all unowned territories
-    unowned_territories = [territory for continent in game.continents for territory in continent.territories if territory.owner is None]
+    unowned_territories = [territory for continent in game.continents for territory in continent.territories if
+                           territory.owner is None]
 
     # If there are no unowned territories, break the loop
     if not unowned_territories:
@@ -70,10 +72,24 @@ while True:
     # Print the unowned territories
     print("Unowned territories:")
     for i, territory in enumerate(unowned_territories):
-        print(f"{i+1}. {territory.name}")
+        print(f"{i + 1}. {territory.name}")
 
-    # Ask the player to choose a territory
-    choice = int(input("Choose a territory by number: ")) - 1
+    # Check if the current player is an AIPlayer
+    if isinstance(game.current_player, AIPlayer):
+        # Get unowned territories adjacent to the AI player's territories
+        adjacent_unowned_territories = [territory for territory in unowned_territories if any(
+            adjacent_territory in game.current_player.territories for adjacent_territory in
+            territory.adjacent_territories)]
+
+        # If there are any adjacent unowned territories, choose from them
+        if adjacent_unowned_territories:
+            choice = random.randint(0, len(adjacent_unowned_territories) - 1)
+        else:
+            # Otherwise, choose a random territory
+            choice = random.randint(0, len(unowned_territories) - 1)
+    else:
+        # Ask the human player to choose a territory
+        choice = int(input("Choose a territory by number: ")) - 1
 
     # Assign the chosen territory to the current player
     chosen_territory = unowned_territories[choice]
@@ -125,8 +141,11 @@ while True:
             game.switch_player()
         elif sign == 2:
             game.attack()
+            game.switch_player()
         else:
             game.place_or_move_armies()
+            game.switch_player()
+
 
 
 
