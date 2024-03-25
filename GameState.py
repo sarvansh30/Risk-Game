@@ -1,5 +1,6 @@
 from Player import Player
-
+import time
+import random
 
 class AIPlayer(Player):
     def __init__(self, name):
@@ -62,6 +63,51 @@ class AIPlayer(Player):
 
         # After all moves have been evaluated, apply the best move
         game.apply_move(best_move)
+        # If the action is 'attack', roll the dice and perform the attack
+        if best_move['action'] == 'attack':
+            for continent in game.continents:
+                for territory in continent.territories:
+                    if territory.name == best_move['from_territory']:
+                        from_territory = territory
+                    if territory.name == best_move['to_territory']:
+                        to_territory = territory
+            num_armies = best_move['num_armies']
+
+            attack_dice = sorted([random.randint(1, 6) for _ in range(num_armies)], reverse=True)
+            defense_dice = sorted([random.randint(1, 6) for _ in range(min(to_territory.armies, 2))], reverse=True)
+
+            # Print the dice rolls
+            print(f"{self.name} rolled {attack_dice} for the attack")
+            print(f"{to_territory.owner.name} rolled {defense_dice} for the defense")
+
+            # Compare dice and remove armies
+            for attack_die, defense_die in zip(attack_dice, defense_dice):
+                if attack_die > defense_die:
+                    to_territory.armies -= 2
+                    if to_territory.armies < 0:
+                        to_territory.armies = 0
+                    if to_territory.armies == 0:
+                        # Remove the territory from the territories list of the previous owner
+                        to_territory.owner.territories.remove(to_territory)
+                        # Change the owner of the territory and add it to the territories list of the new owner
+                        to_territory.owner = self
+                        self.territories.append(to_territory)
+                        to_territory.armies = num_armies
+                else:
+                    self.armies += num_armies
+            # Decrease the number of armies in from_territory by num_armies
+            from_territory.armies -= num_armies
+
+            if to_territory.owner == self:
+                print("The attack was successful!")
+            else:
+                print("The attack was not successful.")
+
+            # Display current player's owned territories with their army numbers
+            print(f"{self.name}'s territories after the attack:")
+            for i, territory in enumerate(self.territories):
+                print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
+
         return best_move
     def update_num_armies(self, num_armies):
         # Update the number of armies the AI player has

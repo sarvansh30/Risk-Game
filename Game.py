@@ -243,7 +243,7 @@ class Game:
                         possible_moves.append({'action': 'move', 'from_territory': territory.name,
                                                'to_territory': adjacent_territory.name, 'num_armies': i})
                 # If the action is to attack, the adjacent territory must not be owned by the player
-                elif adjacent_territory.owner != player:
+                elif adjacent_territory.owner != player and territory.armies > 2:
                     for i in range(1, territory.armies):  # Assume attacking with i armies
                         possible_moves.append({'action': 'attack', 'from_territory': territory.name,
                                                'to_territory': adjacent_territory.name, 'num_armies': i})
