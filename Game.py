@@ -40,19 +40,9 @@ class Game:
     def undo_move(self, move):
         # Extract the details from the move
         action = move['action']
-        from_territory_name = move['from_territory']
-        to_territory_name = move['to_territory']
+        from_territory = move['from_territory']
+        to_territory = move['to_territory']
         num_armies = move['num_armies']
-
-        # Get the territory objects
-        from_territory = None
-        to_territory = None
-        for continent in self.continents:
-            for territory in continent.territories:
-                if territory.name == from_territory_name:
-                    from_territory = territory
-                if territory.name == to_territory_name:
-                    to_territory = territory
 
         if action == 'place':
             # The action was to place armies
@@ -130,101 +120,102 @@ class Game:
         for i, territory in enumerate(self.current_player.territories):
             print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
 
-
-    def place_or_move_armies(self):
+    def place_troops(self):
         # Print the number of troops left for the current player
         print(f"Number of troops left for {self.current_player.name}: {self.current_player.armies}")
 
-        # Show territories owned by the player and number of armies there
+        print("Initial state:")
         for i, territory in enumerate(self.current_player.territories):
             print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
 
         # Ask the player if they want to place troops
-        place_troops = input("Do you want to place troops? (yes/no): ")
-        if place_troops.lower() == "yes":
+        # place_troops = input("Do you want to place troops? (yes/no): ")
+        # if place_troops.lower() == "yes":
             # Ask the player which territory they want to place troops in
-            territory_choice = int(input("Choose a territory by number: ")) - 1
-            chosen_territory = self.current_player.territories[territory_choice]
+        territory_choice = int(input("Choose a territory by number: ")) - 1
+        chosen_territory = self.current_player.territories[territory_choice]
 
             # Ask the player how many troops they want to place
-            num_troops = int(input("Enter number of troops to place (1-2): "))
-            num_troops = min(max(num_troops, 1), 2)  # Ensure num_troops is between 1 and 2
+        num_troops = int(input("Enter number of troops to place (1-2): "))
+        num_troops = min(max(num_troops, 1), 2)  # Ensure num_troops is between 1 and 2
 
             # Update the number of armies for the player and the territory
-            self.current_player.armies -= num_troops
-            chosen_territory.armies += num_troops
+        self.current_player.armies -= num_troops
+        chosen_territory.armies += num_troops
 
+        print("Final state:")
+        for i, territory in enumerate(self.current_player.territories):
+            print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
+
+    def move_armies(self):
+        print("Initial state:")
+        for i, territory in enumerate(self.current_player.territories):
+            print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
         # Ask the player if they want to move armies between territories
-        move_armies = input("Do you want to move armies between territories? (yes/no): ")
-        if move_armies.lower() == "yes":
+        # move_armies = input("Do you want to move armies between territories? (yes/no): ")
+        # if move_armies.lower() == "yes":
             # Ask the player which territory they want to move armies from
-            from_choice = int(input("Choose a territory to move armies from by number: ")) - 1
-            from_territory = self.current_player.territories[from_choice]
+        from_choice = int(input("Choose a territory to move armies from by number: ")) - 1
+        from_territory = self.current_player.territories[from_choice]
 
             # Get adjacent territories owned by the current player
-            owned_adjacent_territories = [territory for territory in from_territory.adjacent_territories if
+        owned_adjacent_territories = [territory for territory in from_territory.adjacent_territories if
                                           territory.owner == self.current_player]
 
             # If there are no owned adjacent territories, print a message and return
-            if not owned_adjacent_territories:
-                print("No adjacent territories owned by you.")
-                return
+        if not owned_adjacent_territories:
+            print("No adjacent territories owned by you.")
+            return
 
             # Show owned adjacent territories
-            print("Adjacent territories owned by you:")
-            for i, territory in enumerate(owned_adjacent_territories):
-                print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
+        print("Adjacent territories owned by you:")
+        for i, territory in enumerate(owned_adjacent_territories):
+            print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
 
             # Ask the player which territory they want to move armies to
-            to_choice = int(input("Choose a territory to move armies to by number: ")) - 1
-            to_territory = owned_adjacent_territories[to_choice]
+        to_choice = int(input("Choose a territory to move armies to by number: ")) - 1
+        to_territory = owned_adjacent_territories[to_choice]
 
             # Ask the player how many armies they want to move
-            max_armies = from_territory.armies - 1  # Leave at least one army behind
-            num_armies = int(input(f"Enter number of armies to move (1-{max_armies}): "))
-            num_armies = min(max(num_armies, 1), max_armies)  # Ensure num_armies is between 1 and max_armies
+        max_armies = from_territory.armies - 1  # Leave at least one army behind
+        num_armies = int(input(f"Enter number of armies to move (1-{max_armies}): "))
+        num_armies = min(max(num_armies, 1), max_armies)  # Ensure num_armies is between 1 and max_armies
 
             # Update the number of armies for the territories
-            from_territory.armies -= num_armies
-            to_territory.armies += num_armies
+        from_territory.armies -= num_armies
+        to_territory.armies += num_armies
+
+        print("Final state:")
+        for i, territory in enumerate(self.current_player.territories):
+            print(f"{i + 1}. {territory.name} (Armies: {territory.armies})")
 
     def get_possible_moves(self, player):
         possible_moves = []
         # Iterate over all territories owned by the player
         for territory in player.territories:
             # If the action is to place armies, the possible move is just the territory
-            possible_moves.append({'action': 'place', 'from_territory': territory.name, 'to_territory': None,
+            possible_moves.append({'action': 'place', 'from_territory': territory, 'to_territory': None,
                                    'num_armies': 1})  # Assume placing 1 army
             # For move or attack actions, iterate over all adjacent territories
             for adjacent_territory in territory.adjacent_territories:
                 # If the action is to move armies, the adjacent territory must be owned by the player
                 if adjacent_territory.owner == player:
                     for i in range(1, territory.armies):  # Assume moving i armies
-                        possible_moves.append({'action': 'move', 'from_territory': territory.name,
-                                               'to_territory': adjacent_territory.name, 'num_armies': i})
+                        possible_moves.append({'action': 'move', 'from_territory': territory,
+                                               'to_territory': adjacent_territory, 'num_armies': i})
                 # If the action is to attack, the adjacent territory must not be owned by the player
                 elif adjacent_territory.owner != player and territory.armies > 2:
                     for i in range(1, territory.armies):  # Assume attacking with i armies
-                        possible_moves.append({'action': 'attack', 'from_territory': territory.name,
-                                               'to_territory': adjacent_territory.name, 'num_armies': i})
+                        possible_moves.append({'action': 'attack', 'from_territory': territory,
+                                               'to_territory': adjacent_territory, 'num_armies': i})
         return possible_moves
 
     def apply_move(self, move):
         # Extract the details from the move
         action = move['action']
-        from_territory_name = move['from_territory']
-        to_territory_name = move['to_territory']
+        from_territory = move['from_territory']
+        to_territory = move['to_territory']
         num_armies = move['num_armies']
-
-        # Get the territory objects
-        from_territory = None
-        to_territory = None
-        for continent in self.continents:
-            for territory in continent.territories:
-                if territory.name == from_territory_name:
-                    from_territory = territory
-                if territory.name == to_territory_name:
-                    to_territory = territory
 
         if action == 'place':
             # The action is to place armies

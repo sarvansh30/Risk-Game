@@ -115,11 +115,16 @@ os.system('cls' if os.name == 'nt' else 'clear')
 print("Risk Game Start\n")
 
 while True:
+    if game.is_over():
+        break
     if isinstance(game.current_player, AIPlayer):  # Check if the current player is an AI player
         possible_moves = game.get_possible_moves(game.current_player)
         print("Possible moves for AI player:")
         for move in possible_moves:
-            print(f"{move['action']}, {move['from_territory']}, {move['to_territory']}, {move['num_armies']}")
+            if move['to_territory']==None:
+                print(f"{move['action']}, {move['from_territory'].name}, {move['to_territory']}, {move['num_armies']}")
+            else :
+                print(f"{move['action']}, {move['from_territory'].name}, {move['to_territory'].name}, {move['num_armies']}")
         # Have the AI player (player2) choose a move
         move = player2.choose_and_apply_move(game,player2)
 
@@ -130,22 +135,25 @@ while True:
         # you can do it here. However, this would typically be done inside the make_move or apply_move function.
         # player2.update_num_armies(move['num_armies'])
         print("Move performed by AI player:")
-        print(f"{move['action']}, {move['from_territory']}, {move['to_territory']}, {move['num_armies']}")
+        if move['to_territory'] == None:
+            print(f"{move['action']}, {move['from_territory'].name}, {move['to_territory']}, {move['num_armies']}")
+        else:
+            print(f"{move['action']}, {move['from_territory'].name}, {move['to_territory'].name}, {move['num_armies']}")
         # Switch to the other player
         game.switch_player()
 
     else:
-        print("Your choice?\n1 End Turn\n2Attack\n3Place Troops")
+        print("Your choice?\n1 Move troops\n2Attack\n3Place Troops")
         sign = int(input())
         if sign == 1:
+            game.move_armies()
             game.switch_player()
         elif sign == 2:
             game.attack()
             game.switch_player()
         else:
-            game.place_or_move_armies()
+            game.place_troops()
             game.switch_player()
-
 
 
 
